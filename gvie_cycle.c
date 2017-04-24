@@ -42,7 +42,7 @@ int main(int argc, char* argv[argc+1]) {
     calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE], 0, hm);
 
     /* comparaison du nouveau tableau avec les (LONGCYCLE-1) précédents */
-    for (size_t j=1 ; j<LONGCYCLE ; j++)
+    for (size_t j=LONGCYCLE-1; j > 0 ; j--)
       if (egal(hm, lm, tt[(i+1)%LONGCYCLE], tt[(i+1+j)%LONGCYCLE], 0, hm)) {
         // on a trouvé le tableau identique !
         gettimeofday(&tv_end, 0);
