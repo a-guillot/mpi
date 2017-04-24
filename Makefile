@@ -1,9 +1,9 @@
 CC=mpicc
 PG=
-CFLAGS= -O3 -Wall $(PG)
+CFLAGS= -O3 -Wall -Werror $(PG)
 LDLIBS= -lX11 -L/usr/X11R6/lib $(PG)
 
-e= gvie gvie_cycle gvie_cycle_mpi1 gvie_cycle_mpi2
+e= gvie gvie_cycle gvie_cycle_mpi1 gvie_cycle_mpi2 gvie_cycle_mpi3
 
 all: $(e)
 

@@ -40,6 +40,12 @@ int ppcm(int count, int *value)
   return res;
 }
 
+void ppcm_reduce(int * in, int * inout, int * len, MPI_Datatype *dptr)
+{
+  int res = _ppcm(*in, *inout);
+  *inout = res;
+}
+
 int main(int argc, char* argv[argc+1]) {
   setlocale(LC_ALL, "");
   struct timeval tv_init, tv_end;
@@ -85,6 +91,13 @@ int main(int argc, char* argv[argc+1]) {
   /* Nombre de ligne par processus */
   unsigned int nb_line_per_proc = hm/size;
 
+  MPI_Op operation;
+  MPI_Datatype type;
+  MPI_Type_contiguous(1, MPI_INT, &type);
+  MPI_Type_commit(&type);
+
+  MPI_Op_create((MPI_User_function *) ppcm_reduce, 1, &operation);
+
   /*
   L'indice de départ de chaque processus
   Rank 0 : 0 * nb_line_per_proc = 0
@@ -117,38 +130,13 @@ int main(int argc, char* argv[argc+1]) {
                 longueur);
         printf("Calcul : %lfs.\n", DIFFTEMPS(tv_init,tv_end));
 
-        if (rank == 0) // process 0. recoit les valeurs puis calcule le ppcm
-        {
-          int res;
-          MPI_Status status;
-          int *array = malloc(size * sizeof(int));
-          array[0] = longueur;
+        int res;
 
-          for (size_t it = 1; it < size; it++)
-          {
-            /*
-            int MPI_Recv(void *buf, int count,
-                        MPI_Datatype datatype,
-                        int source, int tag,
-                        MPI_Comm comm, MPI_Status *status)
-            */
-            MPI_Recv(&res, 1, MPI_INT, it, 0, MPI_COMM_WORLD, &status);
-            printf("0 recoit %d\n", res);
-            array[it] = res;
-          }
-          printf("ppcm total: %d\n", ppcm(size, array));
-        }
-        else // autres processus. envoient leur valeur de cycle et se terminent
-        {
-          /*
-          int MPI_Ssend(void *buf, int count,
-                        MPI_Datatype datatype,
-                        int dest, int tag,
-                        MPI_Comm comm)
-          */
-          printf("%d envoie %d\n", rank, longueur);
-          MPI_Ssend(&longueur, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-        }
+        MPI_Reduce(&longueur, &res, 1, MPI_INT, operation, 0,
+           MPI_COMM_WORLD);
+
+        if (rank == 0)
+          printf("ppcm : %d\n", res);
 
         goto CLEANUP;
       }
