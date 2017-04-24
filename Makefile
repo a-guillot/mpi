@@ -12,3 +12,6 @@ gvie_cycle: graph.o functions.o
 
 clean:
 	/bin/rm -f $(e) *.o gmon.out
+
+archive:
+	zip GUILLOT_andreas.zip -r *.c *.h rapport.txt
