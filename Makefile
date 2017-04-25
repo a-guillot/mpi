@@ -3,7 +3,7 @@ PG=
 CFLAGS= -O3 -Wall -Werror $(PG)
 LDLIBS= -lX11 -L/usr/X11R6/lib $(PG)
 
-e= gvie gvie_cycle gvie_cycle_mpi1 gvie_cycle_mpi2 gvie_cycle_mpi3
+e= gvie gvie_cycle gvie_cycle_mpi1 gvie_cycle_mpi2 gvie_cycle_mpi3 gvie_cycle_mpi4
 
 all: $(e)
 
@@ -12,6 +12,7 @@ gvie_cycle: graph.o functions.o
 gvie_cycle_mpi1: graph.o functions.o
 gvie_cycle_mpi2: graph.o functions.o
 gvie_cycle_mpi3: graph.o functions.o
+gvie_cycle_mpi4: graph.o functions.o
 
 clean:
 	/bin/rm -f $(e) *.o gmon.out
