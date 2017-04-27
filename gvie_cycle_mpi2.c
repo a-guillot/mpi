@@ -15,7 +15,7 @@
 /* longueur cycle recherche de cycle (-1) */
 #define LONGCYCLE 51
 
-int _ppcm(int n1, int n2)
+int _lcm(int n1, int n2)
 {
   int minMultiple;
   minMultiple = (n1>n2) ? n1 : n2;
@@ -29,14 +29,14 @@ int _ppcm(int n1, int n2)
 }
 
 /* Uses commutativity: lcm(a, b, c) = lcm(a, lcm(b, c)) */
-int ppcm(int count, int *value)
+int lcm(int count, int *value)
 {
   if (count <= 0)
     return -1;
 
   int res = value[0];
   for (size_t i = 1; i < count; i++)
-    res = _ppcm(res, value[i]);
+    res = _lcm(res, value[i]);
 
   return res;
 }
@@ -116,7 +116,7 @@ int main(int argc, char* argv[argc+1]) {
                   == MPI_SUCCESS);
             array[it] = res;
           }
-          printf("ppcm total: %d\n", ppcm(size, array));
+          printf("lcm: %d\n", lcm(size, array));
           free(array);
         }
         /* The other processes compute their lcm and send it to the root proc */

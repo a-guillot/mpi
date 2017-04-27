@@ -50,10 +50,6 @@ Un processus qui a trouvé son cycle devrait normalement continuer à calculer s
 Un processus peut donc simplement se terminer quand il a trouvé un cycle et qu'il a envoyé son PPCM au processus root à l'aide d'un appel bloquant à "Ssend", ce qui fait que les processus non-root vont attendre que le root soit capable de réceptionner leur ppcm.
 
 \section*{Tâche 3 :}
-
-L'implémentation de l'opérateur de réduction simplifie le code étant donné que l'opération \textit{reduce} va aussi envoyer les messages.
-De plus, le processus root n'a pas a stocké toutes les valeurs dans un tableau étant donné qu'il peut calculer le PPCM dès qu'il reçoit une valeur d'un autre processus (le PPCM est commutatif).
-
 \section*{Tâche 4 :}
 \section*{Tâche 5 :}
 \section*{Tâche 6 :}
