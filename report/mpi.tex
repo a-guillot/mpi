@@ -41,7 +41,19 @@ Il y a néanmoins un cas intéressant à gérer: si jamais le nombre de lignes n
 Cela est géré en faisant en sorte que le dernier processus fasse un peu plus de travail.
 
 \section*{Question 1 :}
+
+Toute configuration du jeu de la vie finit dans une configuration cyclique étant donné que le plan est fini : un plan fini veut dire un nombre fini de configurations possibles, ce qui a pour conséquence le fait que la configuration finisse forcément par boucler.
+
 \section*{Question 2 :}
+
+La longueur globale du cycle est le PPCM (ou \textit{Least Common Multiple} en anglais et dans mon code) de la longueur de tous les cycles car le cycle global ne peut être obtenu que si tous les sous-cycles de la configuration se terminent au même moment.
+
+Cela veut donc dire que le temps auquel le jeu de la vie atteindra son ultime configuration devra être un multiple du temps de tous les sous-cycles, i.e. le PPCM.
+
+\medskip
+
+Tous les multiples de ce temps global seront eux aussi le dernier état du jeu de la vie, mais le PPCM sera le premier temps auquel cela se produira : dire que le PPCM n'est pas le plus petit temps reviendrait à dire qu'il existe un temps inférieur au PPCM qui soit multiple de tous les sous-cycles, ce qui est absurde vu que le PPCM est le plus petit multiple de tous les temps des sous-cycles.
+
 \section*{Tâche 2 :}
 
 Cette tâche doit calculer le PPCM.
