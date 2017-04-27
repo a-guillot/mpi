@@ -30,64 +30,46 @@ int main(int argc, char* argv[argc+1]) {
   case 0:;
   }
 
-  if (hm <= 200) {
-    printf("ERROR : hm trop petit.\n");
-    exit(1);
-  }
+  /* MPI initialization */
+  CHECK((MPI_Init(&argc, &argv)) == MPI_SUCCESS);
 
-  if (lm <= 200) {
-    printf("ERROR : lm trop petit.\n");
-    exit(1);
-  }
+  /* Get process rank and number of processes */
+  int rank, size;
+  CHECK((MPI_Comm_rank(MPI_COMM_WORLD, &rank)) == MPI_SUCCESS);
+  CHECK((MPI_Comm_size(MPI_COMM_WORLD, &size)) == MPI_SUCCESS);
 
-  /* Initialisation d'MPI */
-  MPI_Init(&argc, &argv);
+  /* Define where a process will start, and for how many lines */
+  unsigned int number_of_lines = hm/size;
+  size_t offset = rank * number_of_lines;
 
-  /* Récupère le numéro de rank */
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  /* Le nombre de processus */
-  int size = 0;
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-  /* Vérification si le nombre de ligne est divisible par le nombre de processus */
-  if (lm%size != 0) {
-    printf("Le nombre de ligne n'est pas divisible par le nombre de processus\n");
-    exit(EXIT_FAILURE);
-  }
-
-  /* Nombre de ligne par processus */
-  unsigned int nb_line_per_proc = hm/size;
-
-  /*
-  L'indice de départ de chaque processus
-  Rank 0 : 0 * nb_line_per_proc = 0
-  Rank 1 : 1 * nb_line_per_proc
-  ...
+  /* If the number of lines isn't divisible be the number of processes,
+      the last one is going to do more work.
   */
-  size_t offset = rank * nb_line_per_proc;
-
+  if ((rank == (size - 1)) && ((hm % size) != 0))
+    number_of_lines += hm % size;
 
   // allocation dynamique sinon stack overflow...
   char (*tt)[hm][lm] = calloc(sizeof(char[hm][lm]), LONGCYCLE); // tableau de tableaux
 
   /* initialisation du premier tableau */
   init(hm, lm, tt[0]);
-
   gettimeofday(&tv_init, 0);
+
   for (size_t i=0 ; i<ITER ; i++) {
     /* calcul du nouveau tableau i+1 en fonction du tableau i */
-    /* Chaque processus calcul le même nombre d'itération et le travail est répartit */
-    calcnouv(nb_line_per_proc, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE], offset, nb_line_per_proc);
+
+    /* Each process computes [number_of_lines] lines starting from [offset]*/
+    calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
+            offset, number_of_lines);
 
     /* comparaison du nouveau tableau avec les (LONGCYCLE-1) précédents */
     for (size_t j=LONGCYCLE-1; j>0; j--)
-      if (egal(nb_line_per_proc, lm, tt[(i+1)%LONGCYCLE], tt[(i+1+j)%LONGCYCLE], 0, nb_line_per_proc)) {
+      if (egal(number_of_lines, lm, tt[(i+1)%LONGCYCLE], tt[(i+1+j)%LONGCYCLE],
+          offset, number_of_lines)) {
         // on a trouvé le tableau identique !
         gettimeofday(&tv_end, 0);
         printf("Cycle trouvé : iteration %zu, longueur %zu\n",
-                i+1,
+                i+1-(LONGCYCLE-j),
                 LONGCYCLE-j);
         printf("Calcul : %lfs.\n", DIFFTEMPS(tv_init,tv_end));
         goto CLEANUP;

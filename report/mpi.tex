@@ -16,8 +16,28 @@
 
 \maketitle
 
+\section*{Notes générales :}
+
+Afin de différencier vos commentaires des miens j'ai choisi de mettre les miens en anglais.
+
+J'ai remplacé la boucle
+\begin{verbatim}
+for (size_t j=1 ; j<LONGCYCLE ; j++)
+\end{verbatim} par \begin{verbatim}
+for (size_t j=LONGCYCLE-1; j>0; j--)
+\end{verbatim} conformément aux instructions que vous avez donné à Brandon et qu'il nous a par la suite transmises.
+
+Enfin, les programmes seront tous compilés par mon \textit{Makefile}, et seront exécutés avec la commande \begin{verbatim}
+mpiexec -np X ./gvie_cycle_mpiY
+\end{verbatim}, où X est le nombre de processus et Y est le numéro de la tâche.
+
 \section{Tâche 1 :}
 
+Cette tâche mets surtout en place la partie MPI du programme.
 
+\medskip
+
+Il y a néanmoins un cas intéressant à gérer: si jamais le nombre de lignes n'est pas divisible par le nombre de processus alors il faut allouer un nombre différent de lignes au dernier processus.
+Cela est géré en faisant en sorte que le dernier processus fasse un peu plus de travail.
 
 \end{document}
