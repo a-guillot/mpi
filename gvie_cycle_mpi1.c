@@ -64,7 +64,7 @@ int main(int argc, char* argv[argc+1]) {
 
     /* comparaison du nouveau tableau avec les (LONGCYCLE-1) précédents */
     for (size_t j=LONGCYCLE-1; j>0; j--)
-      if (egal(number_of_lines, lm, tt[(i+1)%LONGCYCLE], tt[(i+1+j)%LONGCYCLE],
+      if (egal(hm, lm, tt[(i+1)%LONGCYCLE], tt[(i+1+j)%LONGCYCLE],
           offset, number_of_lines)) {
         // on a trouvé le tableau identique !
         gettimeofday(&tv_end, 0);
@@ -83,6 +83,6 @@ int main(int argc, char* argv[argc+1]) {
  CLEANUP:
   free(tt);
   /* Fin du programme */
-  MPI_Finalize();
+  CHECK((MPI_Finalize()) == MPI_SUCCESS);
   return EXIT_SUCCESS;
 }

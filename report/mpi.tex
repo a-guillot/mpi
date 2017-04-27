@@ -31,7 +31,7 @@ Enfin, les programmes seront tous compilés par mon \textit{Makefile}, et seront
 mpiexec -np X ./gvie_cycle_mpiY
 \end{verbatim}, où X est le nombre de processus et Y est le numéro de la tâche.
 
-\section{Tâche 1 :}
+\section*{Tâche 1 :}
 
 Cette tâche mets surtout en place la partie MPI du programme.
 
@@ -39,5 +39,19 @@ Cette tâche mets surtout en place la partie MPI du programme.
 
 Il y a néanmoins un cas intéressant à gérer: si jamais le nombre de lignes n'est pas divisible par le nombre de processus alors il faut allouer un nombre différent de lignes au dernier processus.
 Cela est géré en faisant en sorte que le dernier processus fasse un peu plus de travail.
+
+\section*{Question 1 :}
+\section*{Question 2 :}
+\section*{Tâche 2 :}
+
+Cette tâche doit calculer le PPCM.
+Un processus qui a trouvé son cycle devrait normalement continuer à calculer son prochain état afin de pouvoir envoyer ses frontières à ses voisins, mais il n'y a pas encore de frontières ici.
+
+Un processus peut donc simplement se terminer quand il a trouvé un cycle et qu'il a envoyé son PPCM au processus root à l'aide d'un appel bloquant à "Ssend", ce qui fait que les processus non-root vont attendre que le root soit capable de réceptionner leur ppcm.
+
+\section*{Tâche 3 :}
+\section*{Tâche 4 :}
+\section*{Tâche 5 :}
+\section*{Tâche 6 :}
 
 \end{document}
