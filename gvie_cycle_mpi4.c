@@ -100,14 +100,6 @@ int main(int argc, char* argv[argc+1]) {
   init(hm, lm, tt[0]);
   gettimeofday(&tv_init, 0);
 
-  /* Used to send borders (note: these variables could be reused but I've chosen
-    to separate them in order to improve code readability) */
-  char my_first_line[lm];
-  char my_last_line[lm];
-
-  char my_top_border[lm];
-  char my_bottom_border[lm];
-
   int done = 0, length;
 
   for (size_t i=0 ; i<ITER ; i++) {
@@ -120,15 +112,13 @@ int main(int argc, char* argv[argc+1]) {
 
     if (rank) // rank != 0 -> send first line as a border
     {
-      strncpy(my_first_line, tt[i%LONGCYCLE][offset], lm);
-      CHECK((MPI_Isend(my_first_line, lm, MPI_CHAR, (rank - 1), 0,
+      CHECK((MPI_Isend(tt[i%LONGCYCLE][offset], lm, MPI_CHAR, (rank - 1), 0,
           MPI_COMM_WORLD, &request)) == MPI_SUCCESS);
 
     }
     if (rank != (size - 1)) // if not last one send last line
     {
-      strncpy(my_last_line, tt[i%LONGCYCLE][(offset + number_of_lines -1)], lm);
-      CHECK((MPI_Isend(my_last_line, lm, MPI_CHAR, (rank + 1), 0,
+      CHECK((MPI_Isend(tt[i%LONGCYCLE][(offset + number_of_lines -1)], lm, MPI_CHAR, (rank + 1), 0,
           MPI_COMM_WORLD, &request)) == MPI_SUCCESS);
     }
 
@@ -139,22 +129,15 @@ int main(int argc, char* argv[argc+1]) {
     /* Receive borders */
     MPI_Status status;
     if (rank) // rank != 0 -> receive first line
-      CHECK((MPI_Recv(my_top_border, lm, MPI_CHAR, (rank - 1), 0,
+      CHECK((MPI_Recv(tt[i%LONGCYCLE][offset-1], lm, MPI_CHAR, (rank - 1), 0,
           MPI_COMM_WORLD, &status)) == MPI_SUCCESS);
-
-    if (rank != (size - 1)) // if not last one receive last line
-      CHECK((MPI_Recv(my_bottom_border, lm, MPI_CHAR, (rank + 1), 0,
-          MPI_COMM_WORLD, &status)) == MPI_SUCCESS);
-
-    /* Compute them */
-    if (rank) // rank != 0 -> take the one we've received
-      strncpy(tt[i%LONGCYCLE][offset-1], my_top_border, lm);
 
     calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
             offset, 1);
 
-    if (rank != (size - 1)) // if not last one compute last line
-      strncpy(tt[i%LONGCYCLE][(offset + number_of_lines)],my_top_border,lm);
+    if (rank != (size - 1)) // if not last one receive last line
+      CHECK((MPI_Recv(tt[i%LONGCYCLE][(offset + number_of_lines)], lm, MPI_CHAR, (rank + 1), 0,
+          MPI_COMM_WORLD, &status)) == MPI_SUCCESS);
 
     calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
             (offset + number_of_lines - 1), 1);
@@ -166,14 +149,10 @@ int main(int argc, char* argv[argc+1]) {
       {
         if (egal(hm, lm, tt[(i+1)%LONGCYCLE], tt[(i+1+j)%LONGCYCLE],
             offset, number_of_lines))
-            {
+          {
           // on a trouvé le tableau identique !
           gettimeofday(&tv_end, 0);
           length = LONGCYCLE-j;
-          printf("Cycle trouvé : iteration %zu, longueur %d\n",
-                  i+1-(LONGCYCLE-j),
-                  length);
-          printf("Calcul : %lfs.\n", DIFFTEMPS(tv_init,tv_end));
 
           done = 1;
           break;
@@ -211,5 +190,7 @@ int main(int argc, char* argv[argc+1]) {
   free(tt);
   /* Fin du programme */
   CHECK((MPI_Finalize()) == MPI_SUCCESS);
+  if (!rank)
+    printf("Calcul : %lfs.\n", DIFFTEMPS(tv_init,tv_end));
   return EXIT_SUCCESS;
 }
