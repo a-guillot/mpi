@@ -29,7 +29,7 @@ for (size_t j=LONGCYCLE-1; j>0; j--)
 
 \medskip
 
-En revanche, nous sommes beaucoup à avoir constaté qu'il y avait un problème quand le nombre de processus est un multiple de 4. C'est pourquoi j'ai 2, 4, et 10 pour le \textit{banchmark}.
+En revanche, nous sommes beaucoup à avoir constaté qu'il y avait un problème quand le nombre de processus est un multiple de 4. C'est pourquoi j'ai 2, 6, et 10 pour le \textit{banchmark}.
 
 \medskip
 
@@ -98,10 +98,45 @@ Il est intéressant de noter qu'une fois qu'ils ont trouvé leur cycle alors les
 
 \section*{Tâche 5 :}
 
-
+L'optimisation que j'ai effectuée est de remplacer les \textit{recv} par des \textit{irecv} et de coupler le tout avec des \textit{wait} afin de pouvoir se préparer à recevoir les 2 en même temps.
 
 \section*{Tâche 6 :}
 
+Mon ordinateur contient un i5-7200U avec 2 coeurs, 4 threads et 12Go de RAM.
 
+Les résultats sont dans les tableaux suivants. Table X correspond au programme gvie_cycle_mpiX.
+
+\begin{table}[]
+\centering
+\caption{Version 1}
+\label{my-label}
+\begin{tabular}{rcccc}
+\multicolumn{1}{l}{Nombre de processus :} & 1     & 2     & 6    & 10   \\
+Moyenne                                   & 19.48 & 12.39 & 0.16 & 0.22 \\
+Ecart type                                & 0.23  & 0.06  & 0.02 & 0.03
+\end{tabular}
+\end{table}
+
+\begin{table}[]
+\centering
+\caption{Version 2}
+\label{my-label}
+\begin{tabular}{rcccc}
+\multicolumn{1}{l}{Nombre de processus :} & 1     & 2     & 6    & 10   \\
+Moyenne                                   & 18.04 & 22.02 & 0.23 & 0.27 \\
+Ecart type                                & 0.32  & 0.16  & 0.01 & 0.04
+\end{tabular}
+\end{table}
+
+\begin{table}[]
+\centering
+\caption{Version 3}
+\label{my-label}
+\begin{tabular}{rcccc}
+\multicolumn{1}{l}{Nombre de processus :} & 1     & 2    & 6    & 10   \\
+Moyenne                                   & 17.59 & 8.81 & 0.16 & 0.23 \\
+Ecart type                                & 0.25  & 0.1  & 0.02 & 0.03
+\end{tabular}
+\end{table}
 
 \end{document}
