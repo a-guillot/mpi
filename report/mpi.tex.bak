@@ -16,7 +16,7 @@
 
 \maketitle
 
-\section*{Notes générales :}
+\section{Notes générales :}
 
 Afin de différencier vos commentaires des miens j'ai choisi de mettre les miens en anglais.
 
@@ -27,11 +27,17 @@ for (size_t j=1 ; j<LONGCYCLE ; j++)
 for (size_t j=LONGCYCLE-1; j>0; j--)
 \end{verbatim} conformément aux instructions que vous avez donné à Brandon et qu'il nous a par la suite transmises.
 
+\medskip
+
+En revanche, nous sommes beaucoup à avoir constaté qu'il y avait un problème quand le nombre de processus est un multiple de 4. C'est pourquoi j'ai 2, 4, et 10 pour le \textit{banchmark}.
+
+\medskip
+
 Enfin, les programmes seront tous compilés par mon \textit{Makefile}, et seront exécutés avec la commande \begin{verbatim}
 mpiexec -np X ./gvie_cycle_mpiY
 \end{verbatim}, où X est le nombre de processus et Y est le numéro de la tâche.
 
-\section*{Tâche 1 :}
+\section{Tâche 1 :}
 
 Cette tâche mets surtout en place la partie MPI du programme.
 
@@ -40,34 +46,59 @@ Cette tâche mets surtout en place la partie MPI du programme.
 Il y a néanmoins un cas intéressant à gérer: si jamais le nombre de lignes n'est pas divisible par le nombre de processus alors il faut allouer un nombre différent de lignes au dernier processus.
 Cela est géré en faisant en sorte que le dernier processus fasse un peu plus de travail.
 
-\section*{Question 1 :}
+\section{Question 1 :}
 
-Toute configuration du jeu de la vie finit dans une configuration cyclique étant donné que le plan est fini : un plan fini veut dire un nombre fini de configuration possible, ce qui a pour conséquence le fait que la configuration finisse forcément par boucler.
+Toute configuration du jeu de la vie finit dans une configuration cyclique étant donné que le plan est fini : un plan fini veut dire un nombre fini de configurations possibles, ce qui a pour conséquence le fait que la configuration finisse forcément par boucler.
 
-\section*{Question 2 :}
+\section{Question 2 :}
 
-La longueur globale du cycle est le PPCM (ou \textit{Least Common Multiple} en anglais) de la longueur de tous les cycles car le cycle global ne peut être obtenu que si tous les sous-cycles de la configuration se terminent au même moment.
+La longueur globale du cycle est le PPCM (ou \textit{Least Common Multiple} en anglais et dans mon code) de la longueur de tous les cycles car le cycle global ne peut être obtenu que si tous les sous-cycles de la configuration se terminent au même moment.
 
 Cela veut donc dire que le temps auquel le jeu de la vie atteindra son ultime configuration devra être un multiple du temps de tous les sous-cycles, i.e. le PPCM.
 
 \medskip
 
-Tous les multiples de ce temps global seront eux aussi le dernier état du jeu de la vie, mais le PPCM sera le premier temps auquel sera se produit : dire que le PPCM n'est pas le plus petit temps reviendrait à dire qu'il existe un temps inférieur au PPCM qui soit multiple de tous les sous-cycles, ce qui est absurde vu que le PPCM est la plus petite de ces valeurs.
+Tous les multiples de ce temps global seront eux aussi le dernier état du jeu de la vie, mais le PPCM sera le premier temps auquel cela se produira : dire que le PPCM n'est pas le plus petit temps reviendrait à dire qu'il existe un temps inférieur au PPCM qui soit multiple de tous les sous-cycles, ce qui est absurde vu que le PPCM est le plus petit multiple de tous les temps des sous-cycles.
 
-\section*{Tâche 2 :}
+\section{Tâche 2 :}
 
 Cette tâche doit calculer le PPCM.
 Un processus qui a trouvé son cycle devrait normalement continuer à calculer son prochain état afin de pouvoir envoyer ses frontières à ses voisins, mais il n'y a pas encore de frontières ici.
 
 Un processus peut donc simplement se terminer quand il a trouvé un cycle et qu'il a envoyé son PPCM au processus root à l'aide d'un appel bloquant à "Ssend", ce qui fait que les processus non-root vont attendre que le root soit capable de réceptionner leur ppcm.
 
-\section*{Tâche 3 :}
+\section{Tâche 3 :}
 
 L'implémentation de l'opérateur de réduction simplifie le code étant donné que l'opération \textit{reduce} va aussi envoyer les messages.
 De plus, le processus root n'a pas a stocké toutes les valeurs dans un tableau étant donné qu'il peut calculer le PPCM dès qu'il reçoit une valeur d'un autre processus (le PPCM est commutatif).
 
 \section*{Tâche 4 :}
+
+\subsection{Envoi des frontières}
+
+L'envoi des frontières se fait au tout début d'une itération. Le cas où il n'y a pas de frontières à envoyer est géré grâce au rang.
+
+\subsection{Calcul de l'essentiel du jeu}
+
+Une fois les frontières envoyées on calcule la prochaine étape sur tout le tableau sauf sur les frontières afin de ne pas attendre inutilement l'arrivée des frontières des voisins.
+
+\subsection{Calcul des frontières}
+
+Enfin, on réceptionne les frontières et on les calcule afin de tester si jamais un cycle est trouvé.
+
+\subsection{Détection de la terminaison}
+
+Je me sers d'un \textit{MPI\_Allreduce} afin de faire la somme des processus s'étant terminés, et de répercuter le résultat sur tous les processus.
+
+Les processus s'arrêteront lorsque cette réduction leur annoncera que tous les processus se sont terminés.
+
+\medskip
+
+Il est intéressant de noter qu'une fois qu'ils ont trouvé leur cycle alors les processus continuent de calculer leurs frontières afin de les envoyer aux voisins. En revanche, ils ne testent plus si jamais ils ont trouvé un cycle, ce qui réduit le temps d'exécution.
+
 \section*{Tâche 5 :}
+
+
 \section*{Tâche 6 :}
 
 \end{document}
