@@ -120,7 +120,7 @@ int main(int argc, char* argv[argc+1]) {
 
     if (rank) // rank != 0 -> send first line as a border
     {
-      strncpy(my_first_line, tt[i%LONGCYCLE][0], lm);
+      strncpy(my_first_line, tt[i%LONGCYCLE][offset], lm);
       CHECK((MPI_Isend(my_first_line, lm, MPI_CHAR, (rank - 1), 0,
           MPI_COMM_WORLD, &request)) == MPI_SUCCESS);
     }
