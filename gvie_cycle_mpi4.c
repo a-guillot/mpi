@@ -127,20 +127,32 @@ int main(int argc, char* argv[argc+1]) {
             (offset + 1), (number_of_lines - 2));
 
     /* Receive borders */
-    MPI_Status status;
-    if (rank) // rank != 0 -> receive first line
-      CHECK((MPI_Recv(tt[i%LONGCYCLE][offset-1], lm, MPI_CHAR, (rank - 1), 0,
-          MPI_COMM_WORLD, &status)) == MPI_SUCCESS);
+    MPI_Request request1;
+    MPI_Request request2;
+    MPI_Status s;
 
-    calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
-            offset, 1);
+    if (rank) // rank != 0 -> receive first line
+      CHECK((MPI_Irecv(tt[i%LONGCYCLE][offset-1], lm, MPI_CHAR, (rank - 1), 0,
+          MPI_COMM_WORLD, &request1)) == MPI_SUCCESS);
 
     if (rank != (size - 1)) // if not last one receive last line
-      CHECK((MPI_Recv(tt[i%LONGCYCLE][(offset + number_of_lines)], lm, MPI_CHAR, (rank + 1), 0,
-          MPI_COMM_WORLD, &status)) == MPI_SUCCESS);
+      CHECK((MPI_Irecv(tt[i%LONGCYCLE][(offset + number_of_lines)], lm, MPI_CHAR, (rank + 1), 0,
+          MPI_COMM_WORLD, &request2)) == MPI_SUCCESS);
 
-    calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
+    if (rank)
+    {
+      MPI_Wait(&request1, &s);
+
+      calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
+              offset, 1);
+    }
+    if (rank != (size - 1))
+    {
+      MPI_Wait(&request2, &s);
+
+      calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
             (offset + number_of_lines - 1), 1);
+    }
 
     /* comparaison du nouveau tableau avec les (LONGCYCLE-1) précédents */
     if (!done)
