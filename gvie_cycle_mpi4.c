@@ -121,13 +121,13 @@ int main(int argc, char* argv[argc+1]) {
     if (rank) // rank != 0 -> send first line as a border
     {
       strncpy(my_first_line, tt[i%LONGCYCLE][0], lm);
-      CHECK((MPI_Isend(my_first_line, lm, MPI_CHAR, (rank + 1), 0,
+      CHECK((MPI_Isend(my_first_line, lm, MPI_CHAR, (rank - 1), 0,
           MPI_COMM_WORLD, &request)) == MPI_SUCCESS);
     }
     if (rank != (size - 1)) // if not last one send last line
     {
       strncpy(my_last_line, tt[i%LONGCYCLE][(offset + number_of_lines -1)], lm);
-      CHECK((MPI_Isend(my_last_line, lm, MPI_CHAR, (rank - 1), 0,
+      CHECK((MPI_Isend(my_last_line, lm, MPI_CHAR, (rank + 1), 0,
           MPI_COMM_WORLD, &request)) == MPI_SUCCESS);
     }
 
@@ -146,19 +146,18 @@ int main(int argc, char* argv[argc+1]) {
           MPI_COMM_WORLD, &status)) == MPI_SUCCESS);
 
     /* Compute them */
-    if (rank) // rank != 0 -> Compute first line
-    {
+    if (rank) // rank != 0 -> take the one we've received
       strncpy(tt[i%LONGCYCLE][offset], my_top_border, lm);
-      calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
-              offset, 1);
-    }
+
+    calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
+            offset, 1);
 
     if (rank != (size - 1)) // if not last one compute last line
-    {
       strncpy(tt[i%LONGCYCLE][(offset + number_of_lines - 1)],my_top_border,lm);
-      calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
-              (offset + number_of_lines - 1), 1);
-    }
+
+    calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
+            (offset + number_of_lines - 1), 1);
+
     /* comparaison du nouveau tableau avec les (LONGCYCLE-1) précédents */
     if (!done)
     {
@@ -176,6 +175,7 @@ int main(int argc, char* argv[argc+1]) {
           printf("Calcul : %lfs.\n", DIFFTEMPS(tv_init,tv_end));
 
           done = 1;
+          break;
         }
       }
     }
