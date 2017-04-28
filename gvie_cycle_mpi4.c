@@ -109,7 +109,7 @@ int main(int argc, char* argv[argc+1]) {
   char my_bottom_border[lm];
 
   int done = 0, length;
-
+printf("size rank %d %d\n", size, rank);
   for (size_t i=0 ; i<ITER ; i++) {
     /* calcul du nouveau tableau i+1 en fonction du tableau i */
 
