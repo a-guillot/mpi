@@ -123,7 +123,7 @@ int main(int argc, char* argv[argc+1]) {
       strncpy(my_first_line, tt[i%LONGCYCLE][offset], lm);
       CHECK((MPI_Isend(my_first_line, lm, MPI_CHAR, (rank - 1), 0,
           MPI_COMM_WORLD, &request)) == MPI_SUCCESS);
-        
+
     }
     if (rank != (size - 1)) // if not last one send last line
     {
@@ -148,13 +148,13 @@ int main(int argc, char* argv[argc+1]) {
 
     /* Compute them */
     if (rank) // rank != 0 -> take the one we've received
-      strncpy(tt[i%LONGCYCLE][offset], my_top_border, lm);
+      strncpy(tt[i%LONGCYCLE][offset-1], my_top_border, lm);
 
     calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
             offset, 1);
 
     if (rank != (size - 1)) // if not last one compute last line
-      strncpy(tt[i%LONGCYCLE][(offset + number_of_lines - 1)],my_top_border,lm);
+      strncpy(tt[i%LONGCYCLE][(offset + number_of_lines)],my_top_border,lm);
 
     calcnouv(hm, lm, tt[i%LONGCYCLE], tt[(i+1)%LONGCYCLE],
             (offset + number_of_lines - 1), 1);
