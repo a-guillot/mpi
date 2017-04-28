@@ -109,7 +109,7 @@ int main(int argc, char* argv[argc+1]) {
   char my_bottom_border[lm];
 
   int done = 0, length;
-printf("size rank %d %d\n", size, rank);
+
   for (size_t i=0 ; i<ITER ; i++) {
     /* calcul du nouveau tableau i+1 en fonction du tableau i */
 
@@ -123,6 +123,7 @@ printf("size rank %d %d\n", size, rank);
       strncpy(my_first_line, tt[i%LONGCYCLE][offset], lm);
       CHECK((MPI_Isend(my_first_line, lm, MPI_CHAR, (rank - 1), 0,
           MPI_COMM_WORLD, &request)) == MPI_SUCCESS);
+        
     }
     if (rank != (size - 1)) // if not last one send last line
     {
